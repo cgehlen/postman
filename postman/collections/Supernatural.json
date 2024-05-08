@@ -1,0 +1,4675 @@
+{
+	"info": {
+		"_postman_id": "68c49ce5-bb33-49bd-97d3-33d0870d9783",
+		"name": "Supernatural",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "28221706-68c49ce5-bb33-49bd-97d3-33d0870d9783"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Auth",
+					"id": "1e5e7f21-718d-4e07-8a42-f209dac931bc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"checkToken\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/validateToken",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"validateToken"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AuthLogin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "5ea29e6b-6c50-43a5-bb98-e77d4112d576",
+								"exec": [
+									"pm.globals.set(\"tokenAdmin\", JSON.parse(responseBody).token);\r",
+									"pm.test(\"Status code is 200\", function(){\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "33a4c1a3-2554-48c0-8202-dc5883a79447",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"mail\": \"{{emailAdmin}}\",\r\n    \"password\": \"{{passAdmin}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/login/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"login",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "429d83e2-f4a9-4ed7-bf33-b5253f3b762d"
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Testes Exceção POST Users",
+					"item": [
+						{
+							"name": "Nome completo em branco",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"O campo nome completo é obrigatório.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "41937150-8c05-4096-a2b7-bd940ae43096",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar apenas nome",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"Informe o nome e sobrenome.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "ddad5c7e-3359-4550-a575-910af78f4563",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Maria\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar 101 caracteres no campo \"Nome completo\"",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"O nome completo deve ter no máximo 100 caracteres.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "e85e431e-7f51-46f6-9da2-5e5e77ad3889",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Kmjnhbgvbgvfcdekslkdflsdjflsjdflsjlf Ksjlkdfjslkdjlkdjflsdfjlskdfjlskdfskdflskdfslkdfsfsfsdfsdfsdfsdfa\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar 100 caracteres no campo \"Nome completo\"",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 201', function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"Registro realizado com sucesso\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "dd0ad650-7368-4cf2-baf9-a73376fa5713",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Kmjnhbgvbgvfcdekslkdflsdjflsjdflsjlf Ksjlkdfjslkdjlkdjflsdfjlskdfjlskdfskdflskdfslkdfsfsfsdfsdfsdfsdf\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar números no campo \"Nome Completo\"",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"Informe o nome e sobrenome com as iniciais em letra maiúscula.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "e2c4ba79-7f6a-4eda-84f0-467bbb5f2624",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Nome Teste23049820394802948\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar caracteres especiais no campo \"Nome Completo\"",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"Informe o nome e sobrenome com as iniciais em letra maiúscula.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "238245b2-7705-4518-b338-4980dcc4bfce",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Nome#$%$#$%#$%#  Teste\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar números e caracteres especiais no campo \"Nome Completo\"",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"Informe o nome e sobrenome com as iniciais em letra maiúscula.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "01fb802e-b127-4aa2-ac1e-1738f7a52e65",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"Nome#$%$#$%#$%#251485 Teste\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Campo \"e-mail\" em branco",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"O campo e-mail é obrigatório.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "0239d925-925d-419e-b1fe-74964be198e6",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar tipo de e-mail inválido",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"O e-mail informado é inválido. Informe um e-mail no formato [nome@domínio.com].\");\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"id": "23b9d37f-51a8-4227-b763-a5bb48304e37",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"meue-mail@\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}api/user",
+									"host": [
+										"{{url}}api"
+									],
+									"path": [
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar endereço de e-mail com espaço",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"O e-mail informado é inválido. Informe um e-mail no formato [nome@domínio.com].\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "31bdba28-0a26-40d1-953b-83baa401946a",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"meu e-mal @ blabla.com\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar senha em branco",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"Campo senha é obrigatório\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "67c71fc8-ade8-45b7-a82f-1e9e404de688",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar senha com 7 caracteres",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"Senha precisa ter: uma letra maiúscula, uma letra minúscula, um número, um caractere especial(@#$%) e tamanho entre 8-12.\");\r",
+											"\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "7a9b73e8-8ecd-4f58-a043-56c2528d3081",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"mk987g%\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"mk987g%\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar senha com 13 caracteres",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"Senha precisa ter: uma letra maiúscula, uma letra minúscula, um número, um caractere especial(@#$%) e tamanho entre 8-12.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "41d1bed5-42be-4247-991d-338fd1dd0d67",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"mk987g%254mK1\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"mk987g%254mK1\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar senha fora do padrão",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"Senha precisa ter: uma letra maiúscula, uma letra minúscula, um número, um caractere especial(@#$%) e tamanho entre 8-12.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "8e9cd0b3-9b24-4563-ac85-f32eb858e69e",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"123458451\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"123458451\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deixar campo \"Confirmar senha\" em branco",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"O campo de confirmação de senha não pode ficar vazio.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "f44db927-1e0f-4dac-b87b-c33f051ff276",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"1kjN#$%o\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "ea7db64f-b8be-4aa6-930f-0104467f419e",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO PARA E-MAIL: full name + domain\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+											"function gerarSenha(){\r",
+											"    \r",
+											"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+											"    const comprimentoMinimo = 8;\r",
+											"    const comprimentoMaximo = 16;\r",
+											"\r",
+											"    let senhaArray = [];\r",
+											"\r",
+											"    // garantir um de cada tipo\r",
+											"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+											"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+											"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+											"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+											"\r",
+											"    //verificar se ficou dentro do mínimo e máximo\r",
+											"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+											"\r",
+											"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+											"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+											"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+											"    }\r",
+											"\r",
+											"    // retornar a senha embaralhada\r",
+											"    return shuffleString(senhaArray.join(\"\"));\r",
+											"}\r",
+											"\r",
+											"//função para embaralhar a senha\r",
+											"function shuffleString(string){\r",
+											"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+											"}\r",
+											"\r",
+											"//salvando na variavel Password\r",
+											"pm.environment.set(\"Password\", gerarSenha());\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "afe69635-a27d-4ade-810c-c2390e890942",
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"// salvando o ID na globals\r",
+											"//pm.globals.set(\"IDUserAdmin\", JSON.parse(responseBody).user._id);\r",
+											"\r",
+											"pm.test(\"Check FullName\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).user.fullName).to.eql(pm.environment.get(\"FullName\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check Mail\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).user.mail).to.eql(pm.environment.get(\"Mail\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Test CPF\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).user.cpf).to.eql(pm.environment.get(\"CPF\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Test Password\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).user.password).to.eql(pm.environment.get(\"Password\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).msg).to.eql(\"Registro realizado com sucesso\");\r",
+											"});\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "f7c62f3d-1e9c-45de-beb8-767ccec087c4",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"{{Password}}\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"{{Password}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Informar senha do \"Confirmar senha\" diferente da senha",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+										"exec": [
+											"function firstName() {\r",
+											"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+											"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"function lastName() {\r",
+											"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+											"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set('FirstName', firstName());\r",
+											"pm.environment.set('LastName', lastName());\r",
+											"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"\r",
+											"//FUNÇÃO CPF: 9 numeros\r",
+											"function cpf() {\r",
+											"  const rnd = (n) => Math.round(Math.random() * n);\r",
+											"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+											"  const n = Array(9).fill('').map(() => rnd(9));\r",
+											"\r",
+											"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+											"  d1 = 11 - mod(d1, 11);\r",
+											"  if (d1 >= 10) d1 = 0;\r",
+											"  \r",
+											"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+											"  d2 = 11 - mod(d2, 11);\r",
+											"  if (d2 >= 10) d2 = 0;\r",
+											"\r",
+											"  return `${n.join('')}${d1}${d2}`;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"CPF\", cpf());\r",
+											"\r",
+											"// ------------------------------------------------------------------------------------\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"\r",
+											"function domain(){\r",
+											"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+											"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+											"    return randomItem;\r",
+											"}\r",
+											"pm.environment.set(\"Domain\", domain());\r",
+											"\r",
+											"function user(){\r",
+											"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+											"    return user;\r",
+											"}\r",
+											"\r",
+											"pm.environment.set(\"User\", user());\r",
+											"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+										"exec": [
+											"pm.test('Response status code is 400', function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"})\r",
+											"\r",
+											"pm.test(\"Check Mensage\", function () {\r",
+											"    pm.expect(JSON.parse(responseBody).error[0]).to.eql(\"As senhas não coincidem.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"id": "43423195-6386-4c9a-8a1d-c7345e8830dd",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{tokenAdmin}}",
+											"type": "string"
+										},
+										{
+											"key": "in",
+											"value": "query",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"{{FullName}}\",\r\n  \"mail\": \"{{Mail}}\",\r\n  \"password\": \"1kjN#$%o\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"{{CPF}}\",\r\n  \"confirmPassword\": \"mjnFF34%\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/api/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"user"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"id": "501a6a77-c0d3-4b01-b276-892196c3a067"
+				},
+				{
+					"name": "Lista User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "60b54d43-0533-4e6a-b43d-68d46e28a01f",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "15a13f8d-775a-4dbb-9466-d09e3529dd04",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Count",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "18b3383e-a25c-4351-b5e5-0ba1df83b491",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "c84d90c5-0e44-4b34-aa93-3976d10145f3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/count",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"count"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "id User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d17b0e02-2485-4199-a8a1-00ca1458c8a7",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "730a6380-cbe8-40f7-9dea-bca48c098d65",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/65dcfddfb3cb7c4857eee79f",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"65dcfddfb3cb7c4857eee79f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Altera User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f3b23963-cbf9-43d8-9254-88db60617e5f",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check Mensage\", function () {\r",
+									"    pm.expect(JSON.parse(responseBody).msg).to.eql(\"Solicitação Inválida\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 403\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 500\", function () {\r",
+									"    pm.response.to.have.status(500);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "586839bd-9f46-447b-b66c-34741eb5fc04",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fullName\": \"Joaquim Foenix\",\r\n  \"mail\": \"joca.f@test.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/65e863f1b3cb7c4857f828d2",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"65e863f1b3cb7c4857f828d2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deleta User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0d36efbc-c9f6-4b4c-9a31-a877af06590c",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check Mensage\", function () {\r",
+									"    pm.expect(JSON.parse(responseBody).msg).to.eql(\"Usuário deletado com sucesso\");\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "977514af-8c64-4a12-9a8a-6dbf6ba70db9",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/65e863f1b3cb7c4857f828d4",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"65e863f1b3cb7c4857f828d4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Altera Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d6ebef71-94d0-41dc-8de0-f5356e2e613f",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check Mensage\", function () {\r",
+									"    pm.expect(JSON.parse(responseBody).msg).to.eql(\"Senha atualizada com sucesso\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "a4395586-3881-464f-9e76-b0e374886b3f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"password\": \"1234@Sinf\",\r\n  \"confirmPassword\": \"1234@Sinf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/password/65e285d8b3cb7c4857f3c0fc",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"password",
+								"65e285d8b3cb7c4857f3c0fc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Altera Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "222bb701-3d50-451e-988d-9de5488777d9",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check Mensage\", function () {\r",
+									"    pm.expect(JSON.parse(responseBody).msg).to.eql(\"Status do usuário atualizado com sucesso para status true.\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "169350e2-1397-4259-9365-41430f398db8",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"status\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/status/65dcfddfb3cb7c4857eee79f",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"status",
+								"65dcfddfb3cb7c4857eee79f"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "6d465514-1aeb-4210-94c8-42dfb8e92a00"
+		},
+		{
+			"name": "Department",
+			"item": [
+				{
+					"name": "Lista Department",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "81ee5635-4abc-424d-9112-fcbd43d396ad",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"   \r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "3363850c-04b3-4324-b284-2edce71c2e41",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Insere Department",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "ea7db64f-b8be-4aa6-930f-0104467f419e",
+								"exec": [
+									"function firstName() {\r",
+									"    var firstName = [\"Thaís\", \"Marcos\", \"Rose\", \"Miguel\",\"Helena\",\"Heitor\",\"Bernardo\",\"Arthur\",\"Maria\",\"Laura\",\"Lucas\",\"Davi\",\"Alice\",\"Gabriel\",\"Cecilia\",\"Pedro\",\"Theo\",\"Valentina\",\"Sofia\",\"Julia\",\"Manuela\",\"Luisa\",\"Lorenzo\",\"Maite\",\"Samuel\",\"Lara\",\"Isis\",\"Pedro\",\"Gustavo\",\"Nicolas\",\"Elisa\", , \"Nexus\", \"Orbit\", \"Virtue\", \"Zenith\", \"Quantum\", \"Streamline\", \"Vortex\", \"Fusion\", \"Catalyst\", \"Zen\", \"Pulse\", \"Precision\", \"Vertex\", \"Endeavor\", \"Nova\", \"Odyssey\", \"Agile\", \"Infinity\", \"Evolve\", \"Synergy\", \"Solstice\", \"Dynamo\", \"Pinnacle\", \"Echo\", \"Elemental\", \"Spectrum\", \"Summit\", \"Horizon\", \"Genesis\", \"Eclipse\", \"Amplify\", \"catalyst\", \"Momentum\", \"Perspective\", \"Enigma\", \"Reboot\", \"Infinity\", \"Synapse\", \"Nexus\", \"Luminary\", \"Radiant\", \"Flux\", \"Momentum\", \"Legacy\", \"Aurora\", \"Phoenix\", \"Spectrum\", \"Zenith\", \"Velocity\", \"Unity\", \"Visionary\", \"Quantum\", \"Odyssey\", \"Luminate\", \"Fusion\", \"Dynamo\", \"Virtuoso\", \"Nova\", \"Quest\", \"Pulse\", \"Apex\", \"Envision\", \"Horizon\", \"Illuminate\", \"Catalyst\", \"Thrive\", \"Venture\", \"Synergy\", \"Summit\", \"Apex\", \"Genesis\", \"Pinnacle\", \"Fusion\", \"Evolve\", \"Momentum\", \"Zenith\", \"Vortex\", \"Nexus\", \"Quantum\", \"Echo\", \"Phoenix\", \"Spectrum\", \"Radiant\", \"Synergy\", \"Legacy\", \"Evolve\", \"Odyssey\", \"Virtue\", \"Nova\", \"Horizon\", \"Visionary\", \"Catalyst\", \"Genesis\", \"Pulse\", \"Vertex\"];\r",
+									"    var randomItem = firstName[Math.floor(Math.random() * firstName.length)];\r",
+									"    return randomItem;\r",
+									"}\r",
+									"\r",
+									"function lastName() {\r",
+									"    var lastName = [\"Oliveira\",\"Almeida\",\"Alves\",\"Andrade\",\"Barbosa\",\"Barros\",\"Batista\",\"Borges\",\"Campos\",\"Cardoso\",\"Carvalho\",\"Castro\",\"Costa\",\"Dias\",\"Freitas\",\"Fernandes\",\"Ferreira\",\"Garcia\",\"Gomes\",\"Gonçalves\",\"Lima\",\"Lopes\",\"Machado\",\"Marques\",\"Martins\",\"Medeiros\",\"Melo\",\"Mendes\",\"Miranda\",\"Monteiro\",\"Moraes\",\"Moreira\",\"Nunes\",\"Pereira\",\"Ramos\",\"Reis\",\"Ribeiro\",\"Rocha\",\"Santos\",\"Silva\",\"Soares\",\"Souza\",\"Teixeira\",\"Vieira\"];\r",
+									"    var randomItem = lastName[Math.floor(Math.random() * lastName.length)];\r",
+									"    return randomItem;\r",
+									"}\r",
+									"\r",
+									"pm.environment.set('FirstName', firstName());\r",
+									"pm.environment.set('LastName', lastName());\r",
+									"pm.environment.set('FullName', pm.variables.get(\"FirstName\") + \" \" + pm.variables.get(\"LastName\"));\r",
+									"\r",
+									"// ------------------------------------------------------------------------------------\r",
+									"\r",
+									"// FUNÇÃO PARA E-MAIL: full name + domain\r",
+									"function domain(){\r",
+									"    var domain = [\"@gmail.com\",\"@gmail.com.br\", \"@hotmail.com\", \"@hotmail.com.br\", \"@yahoo.com\",\"@yahoo.com.br\"];\r",
+									"    var randomItem = domain[Math.floor(Math.random() * domain.length)];\r",
+									"    return randomItem;\r",
+									"}\r",
+									"pm.environment.set(\"Domain\", domain());\r",
+									"\r",
+									"function user(){\r",
+									"    var user = pm.variables.get(\"FullName\").toLowerCase().replace(/\\s/g,\"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g,\"\")\r",
+									"    return user;\r",
+									"}\r",
+									"\r",
+									"pm.environment.set(\"User\", user());\r",
+									"\r",
+									"pm.environment.set(\"Mail\", pm.variables.get(\"User\") + pm.variables.get(\"Domain\"));\r",
+									"\r",
+									"// ------------------------------------------------------------------------------------\r",
+									"\r",
+									"//FUNÇÃO CPF: 9 numeros\r",
+									"function cpf() {\r",
+									"  const rnd = (n) => Math.round(Math.random() * n);\r",
+									"  const mod = (base, div) => Math.round(base - Math.floor(base / div) * div)\r",
+									"  const n = Array(9).fill('').map(() => rnd(9));\r",
+									"\r",
+									"  let d1 = n.reduce((total, number, index) => (total + (number * (10 - index))), 0)\r",
+									"  d1 = 11 - mod(d1, 11);\r",
+									"  if (d1 >= 10) d1 = 0;\r",
+									"  \r",
+									"  let d2 = (d1 * 2) + n.reduce((total, number, index) => (total + (number * (11 - index))), 0)\r",
+									"  d2 = 11 - mod(d2, 11);\r",
+									"  if (d2 >= 10) d2 = 0;\r",
+									"\r",
+									"  return `${n.join('')}${d1}${d2}`;\r",
+									"}\r",
+									"\r",
+									"pm.environment.set(\"CPF\", cpf());\r",
+									"\r",
+									"// ------------------------------------------------------------------------------------\r",
+									"\r",
+									"// FUNÇÃO SENHA: 8-12 caracteres, uma maiuscula, uma minuscula, um especial @#$% e numeros\r",
+									"function gerarSenha(){\r",
+									"    \r",
+									"    const caracteres = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%\";\r",
+									"    const comprimentoMinimo = 8;\r",
+									"    const comprimentoMaximo = 16;\r",
+									"\r",
+									"    let senhaArray = [];\r",
+									"\r",
+									"    // garantir um de cada tipo\r",
+									"    senhaArray.push(caracteres[Math.floor(Math.random() * 26)]); // caractere maiusculo\r",
+									"    senhaArray.push(caracteres[26 + Math.floor(Math.random() * 26)]); // caractere minusculo\r",
+									"    senhaArray.push(caracteres[52 + Math.floor(Math.random() * 10)]); // número\r",
+									"    senhaArray.push(caracteres[62 + Math.floor(Math.random() * 4)]); // caractere especial\r",
+									"\r",
+									"    //verificar se ficou dentro do mínimo e máximo\r",
+									"    const comprimmentoRestante = Math.max(comprimentoMinimo - senhaArray.length, comprimentoMaximo - senhaArray.length);\r",
+									"\r",
+									"    //se ficou menor que o mínimo, preencher com qualquer caractere\r",
+									"    for (let i = 0; i < comprimmentoRestante; i++){\r",
+									"        senhaArray.push(caracteres[Math.floor(Math.random() * caracteres.length)]);\r",
+									"    }\r",
+									"\r",
+									"    // retornar a senha embaralhada\r",
+									"    return shuffleString(senhaArray.join(\"\"));\r",
+									"}\r",
+									"\r",
+									"//função para embaralhar a senha\r",
+									"function shuffleString(string){\r",
+									"    return string.split(\"\").sort(() => Math.random() - 0.5).join(\"\");\r",
+									"}\r",
+									"\r",
+									"//salvando na variavel Password\r",
+									"pm.environment.set(\"Password\", gerarSenha());\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "afe69635-a27d-4ade-810c-c2390e890942",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"// salvando o ID na globals\r",
+									"//pm.globals.set(\"IDUserAdmin\", JSON.parse(responseBody).user._id);\r",
+									"\r",
+									"pm.test(\"Check FullName\", function () {\r",
+									"    pm.expect(JSON.parse(responseBody).user.fullName).to.eql(pm.environment.get(\"FullName\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check Mail\", function () {\r",
+									"    pm.expect(JSON.parse(responseBody).user.mail).to.eql(pm.environment.get(\"Mail\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test CPF\", function () {\r",
+									"    pm.expect(JSON.parse(responseBody).user.cpf).to.eql(pm.environment.get(\"CPF\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test Password\", function () {\r",
+									"    pm.expect(JSON.parse(responseBody).user.password).to.eql(pm.environment.get(\"Password\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check Mensage\", function () {\r",
+									"    pm.expect(JSON.parse(responseBody).msg).to.eql(\"Registro realizado com sucesso\");\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "1d0c7814-f508-4007-969c-3dc9a8e7412f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nameDepartment\": \"Novo Departamento\",\r\n  \"costCenterId\": \"64e51573d94be9062773f6da\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/department/",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"department",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Department Count",
+					"id": "9606f490-5714-4fd8-b996-2497b98811e0",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department/count",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department",
+								"count"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "id Department",
+					"id": "e2cc23fa-9970-47c5-86fb-23449edfaffd",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"_id\": \"65384b692bff0787faabce88\",\r\n  \"fullName\": \"Teste do Teste\",\r\n  \"mail\": \"test@test.com.br\",\r\n  \"password\": \"1234@Test\",\r\n  \"accessProfile\": \"ADMIN\",\r\n  \"cpf\": \"11122233344\",\r\n  \"status\": true,\r\n  \"audit\": [\r\n    {\r\n      \"registeredBy\": {\r\n        \"userId\": \"111111111111111111\",\r\n        \"userLogin\": \"sysadmin@qacoders.com\"\r\n      },\r\n      \"registrationDate\": \"terça-feira, 24/10/2023, 19:55:37 BRT\",\r\n      \"registrationNumber\": \"01\",\r\n      \"companyId\": \"Qa.Coders\",\r\n      \"_id\": \"65384b692bff0787faabce89\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/costCenter/",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"costCenter",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Altera Department",
+					"id": "76154203-e1ee-447f-b26f-79223f8cd5b8",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nameDepartment\": \"Novo Departamento\",\r\n  \"costCenterId\": \"64e51573d94be9062773f6da\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/department/65384b692bff0787faabce88",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"department",
+								"65384b692bff0787faabce88"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Altera Status Department",
+					"id": "7d3345d7-0620-4a61-9f22-2d19cf9db2fa",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"status\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/department/status/\n  \"nameDepartment\": \"Novo Departamento\",\n  \"costCenterId\": \"64e51573d94be9062773f6da\"\n}",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"department",
+								"status",
+								"\n  \"nameDepartment\": \"Novo Departamento\",\n  \"costCenterId\": \"64e51573d94be9062773f6da\"\n}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "1678f548-836f-4fdd-b74a-fa96e716e06e"
+		},
+		{
+			"name": "Testes Pesquisa Departamento",
+			"item": [
+				{
+					"name": "Pesquisa somente com uma letra",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "1de41e08-7283-4f3a-8e43-0797fee47b2f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=A",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": "A"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar inserindo o nome completo de um departamento",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "aba30a90-06a0-4da0-a875-015ecaec582f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=Divisionlibero",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": "Divisionlibero"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar com nome de departamento parcial",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "9c9fd34d-4598-4673-8c36-19e5c3b83858",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=Division",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": "Division"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar inserindo  somente letras maiúsculas",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "e881882d-a46e-4307-8215-50ff57b1227e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=RESEARCHCUMQUE",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": "RESEARCHCUMQUE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar inserindo  somente letras minúsculas",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "20bde85d-a146-4d20-8d73-098a2c3cf083",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=researchcumque",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": "researchcumque"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar inserindo  somente caractere especial &",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "c9612845-6dc5-4e87-9404-f367cb9ecb4f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=&",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar todos os departamentos independente do status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "a50b2700-191e-41cf-b2d5-9ec0aab0b6b5",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?status=false",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar inserindo um valor numérico",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "973fc049-407f-4717-9fa1-3c61ab869d66",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=566",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": "566"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar inserindo somente caractere especial diferente de &",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "25ef796a-aa16-460f-8352-115d5a190c1b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=&",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar com campo em branco",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "b61417f9-7480-44a0-a5ec-05f64a1040e8",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pesquisar com 50 caracteres inseridos",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8d736d07-a352-4afc-a1fb-867f140071da",
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "064242da-8142-4eef-81dc-dbddf6e09625",
+								"exec": [
+									"pm.test('Response status code is 200', function () {\r",
+									"    pm.response.to.have.status(200\r",
+									"    );\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "ea811134-4985-416e-81e2-489948d5f518",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{tokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "in",
+									"value": "query",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/department?departmentName=TesteDepartamentoContendoCinquentaDigitosTestetest",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"department"
+							],
+							"query": [
+								{
+									"key": "departmentName",
+									"value": "TesteDepartamentoContendoCinquentaDigitosTestetest"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "ba64b690-a8c5-496a-a4c3-7fc7b8e3abae"
+		}
+	]
+}
